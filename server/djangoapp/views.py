@@ -87,10 +87,14 @@ def get_dealerships(request):
 def get_dealer_details(request, dealer_id):
     context = {}
     if request.method == "GET":
-        url = 'https://aaronadancer-5000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews'
-        context = {"reviews":  get_dealer_reviews_by_id_from_cf(url, dealer_id)}
+        context = {}
+        dealer_url = "https://aaronadancer-3000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
+        dealer = get_dealer_by_id_from_cf(dealer_url, id=dealer_id)
+        context["dealer"] = dealer
 
-        return render(request, 'djangoapp/dealer_details.html', context)
+        url = 'https://aaronadancer-5000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews'
+        context["reviews"] = get_dealer_reviews_by_id_from_cf(url, dealer_id)
+    return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
@@ -118,7 +122,7 @@ def add_review(request, dealer_id):
             if request.POST["purchasecheck"] == 'on':
                 review["purchase"] = True
         review["purchase_date"] = request.POST["purchasedate"]
-        review["car_make"] = car.make.name
+        review["car_make"] = car.carmake.name
         review["car_model"] = car.name
         review["car_year"] = int(car.year.strftime("%Y"))
 
@@ -126,4 +130,4 @@ def add_review(request, dealer_id):
         json_payload["review"] = review
         review_post_url =  "https://aaronadancer-5000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
         post_request(review_post_url, json_payload, id=dealer_id)
-        return redirect("djangoapp:dealer_details", id=dealer_id)
+        return redirect("djangoapp:dealer_details", dealer_id=dealer_id)

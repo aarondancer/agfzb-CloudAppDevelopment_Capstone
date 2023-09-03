@@ -33,7 +33,6 @@ def get_request(url, **kwargs):
 
     status_code = response.status_code
     print("With status {} ".format(status_code))
-    print(response.text)
     json_data = json.loads(response.text)
     return json_data
 
