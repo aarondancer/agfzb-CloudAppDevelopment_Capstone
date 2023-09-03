@@ -35,7 +35,7 @@ app.get('/dealerships/get', (req, res) => {
     // Create a selector object based on query parameters
     const selector = {};
     if (state) {
-        selector.state = state;
+        selector.st = state;
     }
     if (id) {
         selector.id = Number(id);
