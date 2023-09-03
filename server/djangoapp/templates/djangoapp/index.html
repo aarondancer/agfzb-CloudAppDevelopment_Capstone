@@ -14,28 +14,8 @@
 </head>
 
     <body>
-    <!--Add a nav bar here -->
-        <nav class="navbar navbar-light bg-light navbar-expand-md">
-            <a class=" navbar-brand" href="{% url 'djangoapp:index' %}">Dealership Review</a>
-            {% if user.is_authenticated %}
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="btn btn-link" href="#">({{ user.username }})</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-link" href="{% url 'djangoapp:logout' %}">Logout</a>
-                </li>
-            </ul>
-            {% else %}
-            <form action="{% url 'djangoapp:login' %}"  method="post" class="form-inline ml-auto">
-                {% csrf_token %}
-                <input type="text" class="form-control" name="username" placeholder="username">
-                <input type="password" class="form-control" name="password" placeholder="password">
-                <input class="btn btn-primary" type="submit" value="Login">
-                <a class="btn btn-link" type="submit" href="{% url 'djangoapp:registration' %}">Sign Up</a>
-            </form>
-            {% endif %}
-        </nav>
+        {% include 'navbar.html' %}
+        
         <table class="table" id="table" data-filter-control="true">
             <thead>
                 <tr>
