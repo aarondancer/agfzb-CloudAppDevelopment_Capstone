@@ -1,6 +1,8 @@
 name: 'Lint Code'
 
 on:
+  workflow_dispatch:
+    # nothing
   push:
     branches: [master, main]
   pull_request:
