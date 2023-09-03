@@ -3,11 +3,12 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
+from .models import CarModel
 # from .restapis import related methods
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
-from .restapis import get_dealers_from_cf, get_dealer_reviews_by_id_from_cf
+from .restapis import post_request, get_dealers_from_cf, get_dealer_reviews_by_id_from_cf, get_dealer_by_id_from_cf
 import logging
 import json
 
@@ -94,5 +95,37 @@ def get_dealer_details(request, dealer_id):
         return HttpResponse(reviews)
 
 # Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+def add_review(request, dealer_id):
+    context = {}
+    dealer_url = "https://aaronadancer-3000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
+    dealer = get_dealer_by_id_from_cf(dealer_url, id=dealer_id)
+    context["dealer"] = dealer
+    if request.method == 'GET':
+        cars = CarModel.objects.all()
+        context["cars"] = cars
+        return render(request, 'djangoapp/add_review.html', context)
+    elif request.method == 'POST' and request.user.is_authenticated:
+        username = request.user.username
+        print(request.POST)
+        review = dict()
+        car_id = request.POST["car"]
+        car = CarModel.objects.get(pk=car_id)
+        review["time"] = datetime.utcnow().isoformat()
+        review["name"] = username
+        review["dealership"] = dealer_id
+        review["id"] = dealer_id
+        review["review"] = request.POST["content"]
+        review["purchase"] = False
+        if "purchasecheck" in request.POST:
+            if request.POST["purchasecheck"] == 'on':
+                review["purchase"] = True
+        review["purchase_date"] = request.POST["purchasedate"]
+        review["car_make"] = car.make.name
+        review["car_model"] = car.name
+        review["car_year"] = int(car.year.strftime("%Y"))
+
+        json_payload = {}
+        json_payload["review"] = review
+        review_post_url =  "https://aaronadancer-5000.theiadocker-2-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
+        post_request(review_post_url, json_payload, id=dealer_id)
+        return redirect("djangoapp:dealer_details", id=dealer_id)

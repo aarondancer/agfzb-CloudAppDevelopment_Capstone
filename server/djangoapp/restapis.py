@@ -33,9 +33,16 @@ def get_request(url, **kwargs):
 
     status_code = response.status_code
     print("With status {} ".format(status_code))
+    print(response.text)
     json_data = json.loads(response.text)
     return json_data
 
+def post_request(url, json_payload, **kwargs):
+    try:
+        response = requests.post(url, json=json_payload, params=kwargs)
+    except:
+        print("Something went wrong")
+    return response
 
 # Create a get_dealers_from_cf method to get dealers from a cloud function
 # def get_dealers_from_cf(url, **kwargs):
@@ -66,6 +73,20 @@ def get_dealers_from_cf(url, **kwargs):
 # def get_dealer_by_id_from_cf(url, dealerId):
 # - Call get_request() with specified arguments
 # - Parse JSON results into a DealerView object list
+
+def get_dealer_by_id_from_cf(url, id):
+    json_result = get_request(url, id=id)
+    
+    if json_result:
+        dealers = json_result
+        
+        dealer_doc = dealers[0] 
+        dealer_obj = models.CarDealer(address=dealer_doc["address"], city=dealer_doc["city"], full_name=dealer_doc["full_name"],
+                                   id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"],
+                                   short_name=dealer_doc["short_name"],
+                                   st=dealer_doc["st"], zip=dealer_doc["zip"])
+    return dealer_obj
+
 def get_dealer_reviews_by_id_from_cf(url, dealerId):
     results = []
     json_result = get_request(url, id=dealerId)
